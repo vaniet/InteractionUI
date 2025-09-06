@@ -1,0 +1,157 @@
+/* 旋转动画 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 10px;
+        max-height: calc(95vh - 80px);
+    }
+}
+
+/* 评论区域样式 */
+.comment-section {
+    border-top: 1px solid #f0f0f0;
+    padding: 24px;
+}
+
+.comment-input-container {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+
+.comment-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+.comment-textarea:focus {
+    border-color: #692748;
+}
+
+.comment-submit-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.comment-submit-button {
+    padding: 8px 16px;
+    background: #692748;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.comment-submit-button:hover:not(:disabled) {
+    background: #5a1f3d;
+}
+
+.comment-submit-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.comment-item {
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.comment-delete-button {
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: none;
+    border: 1px solid #ff4d4f;
+    color: #ff4d4f;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.comment-delete-button:hover {
+    background: #ff4d4f;
+    color: white;
+}
+
+/* 固定规格图片样式 */
+.fixed-size-image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 200px);
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.fixed-size-image-item {
+    width: 200px;
+    height: 200px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.fixed-size-image-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fixed-size-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 响应式图片网格 */
+@media (max-width: 768px) {
+    .fixed-size-image-grid {
+        grid-template-columns: repeat(auto-fill, 150px);
+        gap: 12px;
+    }
+
+    .fixed-size-image-item {
+        width: 150px;
+        height: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fixed-size-image-grid {
+        grid-template-columns: repeat(auto-fill, 120px);
+        gap: 8px;
+    }
+
+    .fixed-size-image-item {
+        width: 120px;
+        height: 120px;
+    }
+}
