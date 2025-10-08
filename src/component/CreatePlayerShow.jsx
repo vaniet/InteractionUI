@@ -43,19 +43,83 @@ const CreatePlayerShow = ({ isOpen, onClose, onSuccess }) => {
 
     const fetchSeriesList = async () => {
         try {
-            const res = await fetch('http://localhost:7001/series/all');
-            const data = await res.json();
-            if (data.code === 200) {
-                const seriesData = data.data || [];
-                setSeriesList(seriesData);
-
-                // 如果没有选择系列且有系列数据，默认选择第一个
-                if (!formData.seriesId && seriesData.length > 0) {
-                    setFormData(prev => ({ ...prev, seriesId: seriesData[0].id }));
+            // 先获取用户已购买的系列（包含所有状态的订单）
+            const ordersRes = await fetch('http://localhost:7001/purchase/my-purchases', {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
                 }
+            });
+            const ordersData = await ordersRes.json();
+
+            if (ordersData.code === 200) {
+                // 获取订单ID列表
+                const purchaseIds = ordersData.data.purchaseIds || [];
+
+                if (purchaseIds.length === 0) {
+                    setSeriesList([]);
+                    return;
+                }
+
+                // 为每个订单ID获取详细信息
+                const orderPromises = purchaseIds.map(async (orderId) => {
+                    try {
+                        const detailRes = await fetch(`http://localhost:7001/purchase/${orderId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (detailRes.ok) {
+                            const detailData = await detailRes.json();
+                            if (detailData.code === 200) {
+                                return detailData.data;
+                            }
+                        }
+                        return null;
+                    } catch (err) {
+                        console.error(`获取订单 ${orderId} 详情失败:`, err);
+                        return null;
+                    }
+                });
+
+                const orderDetails = await Promise.all(orderPromises);
+                const validOrders = orderDetails.filter(order => order !== null);
+
+                // 从订单中提取已购买的系列ID（包含所有状态的订单）
+                const purchasedSeriesIds = new Set();
+                validOrders.forEach(order => {
+                    if (order.seriesId) {
+                        purchasedSeriesIds.add(order.seriesId);
+                    }
+                });
+
+                // 获取所有系列信息
+                const seriesRes = await fetch('http://localhost:7001/series/all');
+                const seriesData = await seriesRes.json();
+
+                if (seriesData.code === 200) {
+                    // 筛选出已购买的系列
+                    const allSeries = seriesData.data || [];
+                    const purchasedSeries = allSeries.filter(series =>
+                        purchasedSeriesIds.has(series.id)
+                    );
+
+                    setSeriesList(purchasedSeries);
+
+                    // 如果没有选择系列且有已购买的系列数据，默认选择第一个
+                    if (!formData.seriesId && purchasedSeries.length > 0) {
+                        setFormData(prev => ({ ...prev, seriesId: purchasedSeries[0].id }));
+                    }
+                }
+            } else {
+                // 如果获取订单失败，显示空列表
+                setSeriesList([]);
             }
         } catch (err) {
-            console.error('获取系列列表失败:', err);
+            console.error('获取已购买系列列表失败:', err);
+            setSeriesList([]);
         }
     };
 
@@ -374,7 +438,11 @@ const CreatePlayerShow = ({ isOpen, onClose, onSuccess }) => {
                                                 color: '#999',
                                                 fontSize: '14px'
                                             }}>
-                                                暂无可用系列
+                                                <div style={{ marginBottom: '8px' }}>🎁</div>
+                                                <div>您还没有购买过任何系列</div>
+                                                <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                                                    先去购买盲盒再来分享吧！
+                                                </div>
                                             </div>
                                         )}
                                     </div>
