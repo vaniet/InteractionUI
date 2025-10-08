@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import DrawBox from './DrawBox';
 import './DrawBox.css';
 import HorizontalScrollList from './HorizontalScrollList';
@@ -7,6 +7,8 @@ import PaymentConfirmModal from './PaymentConfirmModal';
 
 export default function Series() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [series, setSeries] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -75,6 +77,18 @@ export default function Series() {
     // 取消支付
     const cancelPayment = () => {
         setShowPaymentConfirm(false);
+    };
+
+    // 返回上一页
+    const handleGoBack = () => {
+        const page = searchParams.get('page');
+        if (page) {
+            // 如果有页数参数，返回到主页面并恢复页数
+            navigate(`/mainpage?page=${page}`);
+        } else {
+            // 如果没有页数参数，使用默认返回
+            navigate(-1);
+        }
     };
 
     // 价格显示组件
@@ -187,6 +201,41 @@ export default function Series() {
         <>
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', paddingTop: '80px', height: 'auto', overflow: 'auto' }}>
                 <div style={{ maxWidth: '700px', margin: '0 auto 80px auto', background: 'white', borderRadius: '12px', padding: '32px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                    {/* 返回按钮 */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <button
+                            onClick={handleGoBack}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 16px',
+                                border: '1px solid #d9d9d9',
+                                borderRadius: '8px',
+                                background: 'white',
+                                color: '#333',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.target.style.borderColor = '#692748';
+                                e.target.style.color = '#692748';
+                                e.target.style.boxShadow = '0 4px 8px rgba(105, 39, 72, 0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.target.style.borderColor = '#d9d9d9';
+                                e.target.style.color = '#333';
+                                e.target.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                            }}
+                        >
+                            <span style={{ fontSize: '16px' }}>←</span>
+                            返回
+                        </button>
+                    </div>
+
                     {/* 系列头部信息 */}
                     <div className="series-header">
                         <div className="series-title">{series.name}</div>

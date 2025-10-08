@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function MainPage() {
     const [seriesList, setSeriesList] = useState([]);
@@ -10,12 +10,24 @@ export default function MainPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [priceData, setPriceData] = useState({});
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // 分页相关状态
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     const [pageSize] = useState(24); // 每页24个
+
+    // 处理URL参数中的页数
+    useEffect(() => {
+        const pageParam = searchParams.get('page');
+        if (pageParam) {
+            const page = parseInt(pageParam, 10);
+            if (page > 0) {
+                setCurrentPage(page);
+            }
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         async function fetchData() {
@@ -245,6 +257,10 @@ export default function MainPage() {
     // 分页处理函数
     const handlePageChange = (page) => {
         setCurrentPage(page);
+        // 更新URL参数
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('page', page.toString());
+        navigate(`/mainpage?${newSearchParams.toString()}`, { replace: true });
         // 滚动到顶部
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -392,7 +408,7 @@ export default function MainPage() {
                                 <div
                                     key={series.id}
                                     className="series-card"
-                                    onClick={() => navigate(`/series/${series.id}`)}
+                                    onClick={() => navigate(`/series/${series.id}?page=${currentPage}`)}
                                 >
                                     <div className="series-card-image">
                                         <img src={imageUrl} alt={series.name} />
