@@ -531,11 +531,12 @@ body {
 
 .series-cover-container {
   width: 100%;
-  height: 300px;
+  max-width: 500px;
+  height: 500px;
   background: linear-gradient(135deg, #f8f9fa, #e9ecef);
   border-radius: 16px;
   overflow: hidden;
-  margin-bottom: 40px;
+  margin: 0 auto 40px auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
@@ -629,9 +630,6 @@ body {
   text-align: center;
 }
 
-.style-card:hover {
-  /* 取消整体悬停效果 */
-}
 
 .style-image-container {
   width: 100%;
