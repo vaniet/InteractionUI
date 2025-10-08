@@ -310,7 +310,6 @@ export default function MainPage() {
                                     </div>
                                     <div className="series-card-content">
                                         <div className="series-card-title">{series.name}</div>
-                                        <div className="series-card-description">{series.description}</div>
                                         <PriceDisplay seriesId={series.id} />
                                     </div>
                                 </div>
