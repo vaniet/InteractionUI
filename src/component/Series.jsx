@@ -15,6 +15,7 @@ export default function Series() {
     const [priceData, setPriceData] = useState(null);
     const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
     const [drawResult, setDrawResult] = useState(null);
+    const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
     const drawBoxRef = useRef();
 
     useEffect(() => {
@@ -200,7 +201,17 @@ export default function Series() {
     return (
         <>
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', paddingTop: '80px', height: 'auto', overflow: 'auto' }}>
-                <div style={{ maxWidth: '700px', margin: '0 auto 80px auto', background: 'white', borderRadius: '12px', padding: '32px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+                <div style={{
+                    maxWidth: '1300px',
+                    margin: '0 auto 80px auto',
+                    background: 'rgba(255, 255, 255, 1)',
+                    borderRadius: '16px',
+                    padding: '40px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxSizing: 'border-box'
+                }}>
                     {/* 返回按钮 */}
                     <div style={{ marginBottom: '24px' }}>
                         <button
@@ -236,15 +247,77 @@ export default function Series() {
                         </button>
                     </div>
 
-                    {/* 系列头部信息 */}
+                    {/* 系列标题 */}
                     <div className="series-header">
                         <div className="series-title">{series.name}</div>
-                        <div className="series-subtitle">{series.description}</div>
                     </div>
 
                     {/* 系列封面 */}
                     <div className="series-cover-container">
                         <img src={imageUrl} alt={series.name} className="series-cover-image" />
+                    </div>
+
+                    {/* 系列描述 */}
+                    <div style={{ marginBottom: '40px' }}>
+                        <div style={{
+                            position: 'relative',
+                            color: '#666',
+                            fontSize: '18px',
+                            lineHeight: '1.6',
+                            maxWidth: '1000px',
+                            margin: '0 auto',
+                            textAlign: 'center',
+                            overflow: isDescriptionExpanded ? 'visible' : 'hidden',
+                            display: isDescriptionExpanded ? 'block' : '-webkit-box',
+                            WebkitLineClamp: isDescriptionExpanded ? 'unset' : '3',
+                            WebkitBoxOrient: isDescriptionExpanded ? 'unset' : 'vertical',
+                            lineClamp: isDescriptionExpanded ? 'unset' : '3'
+                        }}>
+                            {series.description}
+                            {!isDescriptionExpanded && series.description && series.description.length > 150 && (
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '0',
+                                    left: '0',
+                                    right: '0',
+                                    height: '1.6em',
+                                    background: 'linear-gradient(transparent, rgba(255, 255, 255, 0.9))',
+                                    pointerEvents: 'none'
+                                }}></div>
+                            )}
+                        </div>
+                        {series.description && series.description.length > 150 && (
+                            <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                                <button
+                                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#692748',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: '500',
+                                        textDecoration: 'underline',
+                                        transition: 'color 0.3s ease',
+                                        outline: 'none'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.color = '#ff69b4';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.color = '#692748';
+                                    }}
+                                    onFocus={(e) => {
+                                        e.target.style.outline = 'none';
+                                    }}
+                                    onBlur={(e) => {
+                                        e.target.style.outline = 'none';
+                                    }}
+                                >
+                                    {isDescriptionExpanded ? '收起' : '点击查看'}
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* 系列细节 */}

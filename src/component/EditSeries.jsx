@@ -409,7 +409,6 @@ const EditSeries = () => {
                                             </div>
                                             <div className="series-details">
                                                 <h3 className="series-name">{series.name}</h3>
-                                                <p className="series-description">{series.description}</p>
                                                 <span className="series-count">款式数量: {series.styleCount}</span>
                                             </div>
                                         </div>
