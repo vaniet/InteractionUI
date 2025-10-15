@@ -267,9 +267,7 @@ const EditUser = ({ onSuccess, onCancel }) => {
                         >
                             {formData.avatar ? (
                                 <img
-                                    src={(formData.avatar && (formData.avatar.startsWith('http') || formData.avatar.startsWith('data:')))
-                                        ? formData.avatar
-                                        : `http://localhost:7001/${formData.avatar}`}
+                                    src={formData.avatar.startsWith('http') ? formData.avatar : `http://localhost:7001/${formData.avatar}`}
                                     alt="头像"
                                     style={{
                                         width: '100%',

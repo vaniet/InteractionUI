@@ -210,29 +210,33 @@ export default function MainPage() {
             }
             return;
         }
-        // 使用后端搜索接口
-        try {
-            const searchRes = await fetch('http://localhost:7001/series/searchByMessage', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ keyword: value })
-            });
-            const searchData = await searchRes.json();
 
-            if (searchData.code === 200) {
-                const matchedSeries = searchData.data || [];
-                setFilteredSeriesList(matchedSeries);
+        // 搜索时需要获取所有系列数据
+        try {
+            const allSeriesRes = await fetch('http://localhost:7001/series/listed');
+            const allSeriesData = await allSeriesRes.json();
+
+            if (allSeriesData.code === 200) {
+                const allSeries = allSeriesData.data || [];
+
+                // 在消息数据中搜索匹配的内容
+                const matchedMessages = messageList.filter(message =>
+                    message.content.toLowerCase().includes(value.toLowerCase())
+                );
+
+                // 获取匹配消息对应的系列ID
+                const matchedSeriesIds = matchedMessages.map(message => message.seriesId);
+
+                // 过滤出匹配的系列
+                const filtered = allSeries.filter(series =>
+                    matchedSeriesIds.includes(series.id)
+                );
+
+                setFilteredSeriesList(filtered);
                 setCurrentPage(1); // 搜索时重置到第一页
-                // 获取匹配系列的价格信息，保证价格展示
-                await fetchAllPrices(matchedSeries);
-            } else {
-                setFilteredSeriesList([]);
             }
         } catch (err) {
             console.error('搜索失败:', err);
-            setFilteredSeriesList([]);
         }
     };
 
