@@ -131,7 +131,6 @@
     background: rgba(0, 0, 0, 0.05);
 }
 
-<<<<<<< HEAD
 /* 头部右侧发货按钮区域 */
 .manage-order-header-actions {
     margin-left: 12px;
@@ -173,8 +172,6 @@
     transform: translateY(-1px);
 }
 
-=======
->>>>>>> a94d1738da790bc48a8d4842bf995b3144d39a10
 /* 批量操作 */
 .manage-batch-actions {
     display: flex;
@@ -384,7 +381,6 @@
     word-break: break-all;
 }
 
-<<<<<<< HEAD
 /* 单个订单操作按钮（管理端） */
 .manage-order-actions {
     display: flex;
@@ -429,8 +425,6 @@
     }
 }
 
-=======
->>>>>>> a94d1738da790bc48a8d4842bf995b3144d39a10
 
 
 /* 分页 */
