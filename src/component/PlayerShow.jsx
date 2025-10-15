@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import CreatePlayerShow from './CreatePlayerShow';
 import PlayerShowDetail from './PlayerShowDetail';
 import './PlayerShow.css';
@@ -10,11 +10,25 @@ export default function PlayerShow() {
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const pageSize = 9; // 3列 x 3行
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [selectedShowcaseId, setSelectedShowcaseId] = useState(null);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
+    // 从 URL 初始化当前页
+    useEffect(() => {
+        const pageParam = searchParams.get('page');
+        if (pageParam) {
+            const page = parseInt(pageParam, 10);
+            if (page > 0) {
+                setCurrentPage(page);
+            }
+        }
+    }, [searchParams]);
+
+    // 页码变化时拉取数据
     useEffect(() => {
         fetchShowcases();
     }, [currentPage]);
@@ -42,14 +56,23 @@ export default function PlayerShow() {
         setLoading(true);
         setError('');
         try {
-            const url = `http://localhost:7001/player-shows/list?page=${currentPage}&limit=10&orderBy=createdAt&orderDirection=DESC`;
+            const url = `http://localhost:7001/player-shows/list?page=${currentPage}&limit=${pageSize}&orderBy=createdAt&orderDirection=DESC`;
 
             const res = await fetch(url);
             const data = await res.json();
 
             if (data.code === 200) {
-                setShowcases(data.data.list || []);
-                setTotal(data.data.total || 0);
+                const list = Array.isArray(data.data?.list) ? data.data.list : [];
+                const reportedTotal = Number(data.data?.total) || list.length;
+
+                // 若后端未正确分页（一次性返回所有数据），则前端按页切片
+                const shouldClientPaginate = list.length > pageSize && (reportedTotal === list.length || !Number.isFinite(Number(data.data?.total)));
+                const startIndex = (currentPage - 1) * pageSize;
+                const endIndex = startIndex + pageSize;
+                const visibleList = shouldClientPaginate ? list.slice(startIndex, endIndex) : list;
+
+                setShowcases(visibleList);
+                setTotal(reportedTotal);
             } else {
                 setError(data.message || '获取玩家秀失败');
             }
@@ -68,6 +91,15 @@ export default function PlayerShow() {
     const handleCreateSuccess = () => {
         // 刷新玩家秀列表
         fetchShowcases();
+    };
+
+    // 分页处理：更新页码、同步 URL，并滚动到顶部
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.set('page', page.toString());
+        navigate(`/playershow?${newSearchParams.toString()}`, { replace: true });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
@@ -94,7 +126,11 @@ export default function PlayerShow() {
                 )}
 
                 {!loading && !error && (
-                    <div className="player-show-grid">
+                    <div className="player-show-grid" style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                        gap: '24px'
+                    }}>
                         {showcases.map(showcase => (
                             <div
                                 key={showcase.id}
@@ -179,7 +215,125 @@ export default function PlayerShow() {
                         color: '#666',
                         fontSize: '14px'
                     }}>
-                        共 {total} 条玩家秀
+                        共 {total} 条玩家秀，第 {currentPage} 页，共 {Math.ceil(total / pageSize)} 页
+                    </div>
+                )}
+
+                {/* 分页控件 */}
+                {!loading && !error && total > pageSize && (
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginTop: '20px',
+                        gap: '8px'
+                    }}>
+                        {/* 上一页 */}
+                        <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            style={{
+                                padding: '8px 16px',
+                                border: '1px solid #d9d9d9',
+                                borderRadius: '6px',
+                                background: currentPage === 1 ? '#f5f5f5' : 'white',
+                                color: currentPage === 1 ? '#ccc' : '#333',
+                                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                                fontSize: '14px',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (currentPage !== 1) {
+                                    e.target.style.borderColor = '#692748';
+                                    e.target.style.color = '#692748';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (currentPage !== 1) {
+                                    e.target.style.borderColor = '#d9d9d9';
+                                    e.target.style.color = '#333';
+                                }
+                            }}
+                        >
+                            上一页
+                        </button>
+
+                        {/* 页码按钮，最多显示 5 个 */}
+                        {Array.from({ length: Math.min(5, Math.ceil(total / pageSize)) }, (_, i) => {
+                            const totalPages = Math.ceil(total / pageSize);
+                            let pageNum;
+                            if (totalPages <= 5) {
+                                pageNum = i + 1;
+                            } else if (currentPage <= 3) {
+                                pageNum = i + 1;
+                            } else if (currentPage >= totalPages - 2) {
+                                pageNum = totalPages - 4 + i;
+                            } else {
+                                pageNum = currentPage - 2 + i;
+                            }
+
+                            return (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => handlePageChange(pageNum)}
+                                    style={{
+                                        padding: '8px 12px',
+                                        border: '1px solid #d9d9d9',
+                                        borderRadius: '6px',
+                                        background: currentPage === pageNum ? '#692748' : 'white',
+                                        color: currentPage === pageNum ? 'white' : '#333',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        minWidth: '40px',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (currentPage !== pageNum) {
+                                            e.target.style.borderColor = '#692748';
+                                            e.target.style.color = '#692748';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (currentPage !== pageNum) {
+                                            e.target.style.borderColor = '#d9d9d9';
+                                            e.target.style.color = '#333';
+                                        }
+                                    }}
+                                >
+                                    {pageNum}
+                                </button>
+                            );
+                        })}
+
+                        {/* 下一页 */}
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === Math.ceil(total / pageSize)}
+                            style={{
+                                padding: '8px 16px',
+                                border: '1px solid #d9d9d9',
+                                borderRadius: '6px',
+                                background: currentPage === Math.ceil(total / pageSize) ? '#f5f5f5' : 'white',
+                                color: currentPage === Math.ceil(total / pageSize) ? '#ccc' : '#333',
+                                cursor: currentPage === Math.ceil(total / pageSize) ? 'not-allowed' : 'pointer',
+                                fontSize: '14px',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (currentPage !== Math.ceil(total / pageSize)) {
+                                    e.target.style.borderColor = '#692748';
+                                    e.target.style.color = '#692748';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (currentPage !== Math.ceil(total / pageSize)) {
+                                    e.target.style.borderColor = '#d9d9d9';
+                                    e.target.style.color = '#333';
+                                }
+                            }}
+                        >
+                            下一页
+                        </button>
                     </div>
                 )}
             </div>
