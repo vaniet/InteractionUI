@@ -28,6 +28,7 @@ const Dashboard = () => {
     const [showEditUser, setShowEditUser] = useState(false);
     const navigate = useNavigate();
     const { user, loading, error, logout, refreshUser } = useUser();
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
 
 
@@ -271,14 +272,7 @@ const Dashboard = () => {
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        if (window.confirm('确定要退出登录吗？')) {
-                                            logout();
-                                            setMsgType('success');
-                                            setMsg('退出登录成功');
-                                            setTimeout(() => navigate('/login'), 1500);
-                                        }
-                                    }}
+                                    onClick={() => setShowLogoutConfirm(true)}
                                     style={{
                                         padding: '10px 20px',
                                         border: '1px solid #ff4d4f',
@@ -313,6 +307,90 @@ const Dashboard = () => {
                     }}
                     onCancel={() => setShowEditUser(false)}
                 />
+            )}
+            {showLogoutConfirm && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.45)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2000
+                }}>
+                    <div style={{
+                        width: '90%',
+                        maxWidth: '420px',
+                        background: 'white',
+                        borderRadius: '12px',
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.2)',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            padding: '20px 24px',
+                            borderBottom: '1px solid #f0f0f0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px'
+                        }}>
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                background: '#fff1f0',
+                                color: '#ff4d4f',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '20px',
+                                flexShrink: 0
+                            }}>⚠️</div>
+                            <div>
+                                <div style={{ fontSize: '16px', fontWeight: 600, color: '#333' }}>确认退出登录</div>
+                                <div style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>退出后需要重新登录才能继续使用账号功能。</div>
+                            </div>
+                        </div>
+                        <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                style={{
+                                    padding: '8px 16px',
+                                    border: '1px solid #d9d9d9',
+                                    borderRadius: '6px',
+                                    background: 'white',
+                                    color: '#333',
+                                    cursor: 'pointer',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                取消
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowLogoutConfirm(false);
+                                    logout();
+                                    setMsgType('success');
+                                    setMsg('退出登录成功');
+                                    setTimeout(() => navigate('/login'), 800);
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    background: '#ff4d4f',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                确认退出
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     );
