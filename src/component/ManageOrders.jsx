@@ -12,7 +12,7 @@ function TopMessage({ message, type, onClose }) {
     }, [message, onClose]);
     if (!message) return null;
     return (
-        <div 
+        <div
             className={`top-message top-message-${type}`}
             style={{
                 position: 'fixed',
@@ -406,212 +406,253 @@ const ManageOrders = () => {
     return (
         <>
             <TopMessage message={msg} type={msgType} onClose={() => setMsg('')} />
-            <div className="manage-orders-container">
-                <h1 style={{ textAlign: 'center', marginBottom: '32px', color: '#692748', fontSize: '28px', fontWeight: '600' }}>
-                    订单管理
-                </h1>
+            <div style={{ paddingTop: '20px', display: 'flex', justifyContent: 'center', width: '100%' }}>
+                <div style={{
+                    width: '100%',
+                    maxWidth: '1300px',
+                    minHeight: '800px',
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: '16px',
+                    padding: '40px',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    boxSizing: 'border-box'
+                }}>
+                    <div className="manage-orders-container">
+                        <h1 style={{ textAlign: 'center', marginBottom: '32px', color: '#692748', fontSize: '28px', fontWeight: '600' }}>
+                            订单管理
+                        </h1>
 
-                {/* 状态筛选 */}
-                <div className="manage-status-filter">
-                    {statusFilters.map(filter => (
-                        <button
-                            key={filter.key}
-                            className={`manage-status-filter-btn ${selectedStatus === filter.key ? 'active' : ''}`}
-                            onClick={() => {
-                                setSelectedStatus(filter.key);
-                                setCurrentPage(1);
-                                // 切换到其他状态时清空选中的订单
-                                if (filter.key !== 'pending') {
-                                    setSelectedOrders(new Set());
-                                }
-                            }}
-                        >
-                            {filter.label}
-                        </button>
-                    ))}
-                </div>
-
-                {/* 订单统计 */}
-                <div style={{ textAlign: 'center', marginBottom: '24px', color: '#666' }}>
-                    共 {totalOrders} 个订单
-                </div>
-
-                {/* 批量操作 - 只在待发货状态下显示 */}
-                {(selectedStatus === 'pending' && orders.length > 0) && (
-                    <div className="manage-batch-actions">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div className="manage-select-all">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedOrders.size === orders.length && orders.length > 0}
-                                    onChange={toggleSelectAll}
-                                    id="select-all"
-                                />
-                                <label htmlFor="select-all">全选</label>
-                            </div>
-                            <span className="manage-selection-count">
-                                已选择 {selectedOrders.size} 个订单
-                            </span>
+                        {/* 状态筛选 */}
+                        <div className="manage-status-filter">
+                            {statusFilters.map(filter => (
+                                <button
+                                    key={filter.key}
+                                    className={`manage-status-filter-btn ${selectedStatus === filter.key ? 'active' : ''}`}
+                                    onClick={() => {
+                                        setSelectedStatus(filter.key);
+                                        setCurrentPage(1);
+                                        // 切换到其他状态时清空选中的订单
+                                        if (filter.key !== 'pending') {
+                                            setSelectedOrders(new Set());
+                                        }
+                                    }}
+                                >
+                                    {filter.label}
+                                </button>
+                            ))}
                         </div>
-                        {selectedOrders.size > 0 && (
-                            <div className="manage-batch-buttons">
-                                {selectedStatus === 'pending' && (
-                                    <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
-                                        批量发货 ({selectedOrders.size})
-                                    </button>
-                                )}
 
+                        {/* 订单统计 */}
+                        <div style={{ textAlign: 'center', marginBottom: '24px', color: '#666' }}>
+                            共 {totalOrders} 个订单
+                        </div>
+
+                        {/* 批量操作 - 只在待发货状态下显示 */}
+                        {(selectedStatus === 'pending' && orders.length > 0) && (
+                            <div className="manage-batch-actions">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div className="manage-select-all">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedOrders.size === orders.length && orders.length > 0}
+                                            onChange={toggleSelectAll}
+                                            id="select-all"
+                                        />
+                                        <label htmlFor="select-all">全选</label>
+                                    </div>
+                                    <span className="manage-selection-count">
+                                        已选择 {selectedOrders.size} 个订单
+                                    </span>
+                                </div>
+                                {selectedOrders.size > 0 && (
+                                    <div className="manage-batch-buttons">
+                                        {selectedStatus === 'pending' && (
+                                            <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
+                                                批量发货 ({selectedOrders.size})
+                                            </button>
+                                        )}
+
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* 订单列表 */}
+                        {loading ? (
+                            <div className="loading-container">
+                                <div className="loading-spinner"></div>
+                                <div className="loading-text">加载中...</div>
+                            </div>
+                        ) : error ? (
+                            <div className="error-container">
+                                <div className="error-icon">⚠️</div>
+                                <div className="error-text">{error}</div>
+                            </div>
+                        ) : orders.length === 0 ? (
+                            <div className="manage-no-orders">
+                                <div className="manage-no-orders-icon">📦</div>
+                                <div className="manage-no-orders-text">暂无订单</div>
+                            </div>
+                        ) : (
+                            <div className="manage-orders-grid">
+                                {orders.map(order => (
+                                    <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
+                                        <div className="manage-order-header">
+                                            {selectedStatus === 'pending' && (
+                                                <div className="manage-order-selection">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedOrders.has(order.id)}
+                                                        onChange={() => toggleOrderSelection(order.id)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="manage-order-id">订单号: {order.id}</div>
+                                            <div className="manage-order-status" style={{ color: getStatusColor(order.shippingStatus) }}>
+                                                {getStatusDisplayName(order.shippingStatus)}
+                                            </div>
+                                        </div>
+                                        <div className="manage-order-content">
+                                            <div className="manage-order-left">
+                                                <div className="manage-order-images">
+                                                    <div className="manage-style-image">
+                                                        <img src={`http://localhost:7001/${order.styleCover}`} alt={order.styleName} />
+                                                    </div>
+                                                </div>
+                                                <div className="manage-order-info">
+                                                    <div className="manage-series-name">{order.seriesName}</div>
+                                                    <div className="manage-style-name">{order.styleName}</div>
+                                                    {order.isHidden && <div className="manage-hidden-badge">隐藏款</div>}
+                                                    <div className="manage-purchase-time">购买时间: {formatDate(order.createdAt)}</div>
+                                                    <div className="manage-user-id">用户ID: {order.userId}</div>
+                                                    {/* 收货信息状态标识 - 只在待发货状态显示 */}
+                                                    {order.shippingStatus === 'pending' && (
+                                                        <div className={`manage-shipping-info-status ${shippingInfoStatus[order.id] ? 'complete' : 'incomplete'}`}>
+                                                            {shippingInfoStatus[order.id] ? '✅ 收货信息已填写' : '⚠️ 收货信息未填写'}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* 统一的信息显示区域 - 所有状态都显示 */}
+                                            <div className={`manage-shipping-info-right ${order.shippingStatus === 'delivered' ? 'delivered' : ''}`}>
+                                                {/* 收货信息 */}
+                                                {(order.receiverName || order.receiverPhone || order.shippingAddress) && (
+                                                    <>
+                                                        {order.receiverName && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">收件人:</span>
+                                                                <span className="manage-shipping-value">{order.receiverName}</span>
+                                                            </div>
+                                                        )}
+                                                        {order.receiverPhone && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">收货手机:</span>
+                                                                <span className="manage-shipping-value">{order.receiverPhone}</span>
+                                                            </div>
+                                                        )}
+                                                        {order.shippingAddress && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">收货地址:</span>
+                                                                <span className="manage-shipping-value">{order.shippingAddress}</span>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {/* 物流信息 */}
+                                                {(order.trackingNumber || order.shippedAt || order.deliveredAt) && (
+                                                    <>
+                                                        {order.trackingNumber && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">运单号:</span>
+                                                                <span className="manage-shipping-value">{order.trackingNumber}</span>
+                                                            </div>
+                                                        )}
+                                                        {order.shippedAt && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">发货时间:</span>
+                                                                <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
+                                                            </div>
+                                                        )}
+                                                        {order.deliveredAt && (
+                                                            <div className="manage-shipping-item">
+                                                                <span className="manage-shipping-label">收货时间:</span>
+                                                                <span className="manage-shipping-value">{formatDate(order.deliveredAt)}</span>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+
+                                                {/* 如果没有任何信息，显示提示 */}
+                                                {!order.receiverName && !order.receiverPhone && !order.shippingAddress &&
+                                                    !order.trackingNumber && !order.shippedAt && !order.deliveredAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
+                                                                暂无详细信息
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* 分页 */}
+                        {totalPages > 1 && (
+                            <div className="manage-pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '24px' }}>
+                                <button
+                                    className="manage-pagination-btn"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage(currentPage - 1)}
+                                >
+                                    上一页
+                                </button>
+                                {(() => {
+                                    const buttons = [];
+                                    const makeBtn = (pageNum) => (
+                                        <button
+                                            key={`page-${pageNum}`}
+                                            className="manage-pagination-btn"
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            disabled={currentPage === pageNum}
+                                            style={{
+                                                background: currentPage === pageNum ? '#692748' : undefined,
+                                                color: currentPage === pageNum ? '#fff' : undefined,
+                                                borderColor: currentPage === pageNum ? '#692748' : undefined
+                                            }}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    );
+
+                                    if (totalPages <= 5) {
+                                        for (let i = 1; i <= totalPages; i++) buttons.push(makeBtn(i));
+                                    } else {
+                                        buttons.push(makeBtn(1));
+                                        buttons.push(makeBtn(2));
+                                        buttons.push(makeBtn(3));
+                                        buttons.push(<span key="ellipsis" style={{ padding: '0 8px', color: '#999' }}>...</span>);
+                                        buttons.push(makeBtn(totalPages));
+                                    }
+                                    return buttons;
+                                })()}
+                                <button
+                                    className="manage-pagination-btn"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage(currentPage + 1)}
+                                >
+                                    下一页
+                                </button>
                             </div>
                         )}
                     </div>
-                )}
-
-                {/* 订单列表 */}
-                {loading ? (
-                    <div className="loading-container">
-                        <div className="loading-spinner"></div>
-                        <div className="loading-text">加载中...</div>
-                    </div>
-                ) : error ? (
-                    <div className="error-container">
-                        <div className="error-icon">⚠️</div>
-                        <div className="error-text">{error}</div>
-                    </div>
-                ) : orders.length === 0 ? (
-                    <div className="manage-no-orders">
-                        <div className="manage-no-orders-icon">📦</div>
-                        <div className="manage-no-orders-text">暂无订单</div>
-                    </div>
-                ) : (
-                    <div className="manage-orders-grid">
-                            {orders.map(order => (
-                                <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
-                                    <div className="manage-order-header">
-                                        {selectedStatus === 'pending' && (
-                                            <div className="manage-order-selection">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedOrders.has(order.id)}
-                                                    onChange={() => toggleOrderSelection(order.id)}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                            </div>
-                                        )}
-                                        <div className="manage-order-id">订单号: {order.id}</div>
-                                        <div className="manage-order-status" style={{ color: getStatusColor(order.shippingStatus) }}>
-                                            {getStatusDisplayName(order.shippingStatus)}
-                                        </div>
-                                    </div>
-                                    <div className="manage-order-content">
-                                        <div className="manage-order-left">
-                                            <div className="manage-order-images">
-                                                <div className="manage-style-image">
-                                                    <img src={`http://localhost:7001/${order.styleCover}`} alt={order.styleName} />
-                                                </div>
-                                            </div>
-                                            <div className="manage-order-info">
-                                                <div className="manage-series-name">{order.seriesName}</div>
-                                                <div className="manage-style-name">{order.styleName}</div>
-                                                {order.isHidden && <div className="manage-hidden-badge">隐藏款</div>}
-                                                <div className="manage-purchase-time">购买时间: {formatDate(order.createdAt)}</div>
-                                                <div className="manage-user-id">用户ID: {order.userId}</div>
-                                                {/* 收货信息状态标识 - 只在待发货状态显示 */}
-                                                {order.shippingStatus === 'pending' && (
-                                                    <div className={`manage-shipping-info-status ${shippingInfoStatus[order.id] ? 'complete' : 'incomplete'}`}>
-                                                        {shippingInfoStatus[order.id] ? '✅ 收货信息已填写' : '⚠️ 收货信息未填写'}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* 统一的信息显示区域 - 所有状态都显示 */}
-                                        <div className={`manage-shipping-info-right ${order.shippingStatus === 'delivered' ? 'delivered' : ''}`}>
-                                            {/* 收货信息 */}
-                                            {(order.receiverName || order.receiverPhone || order.shippingAddress) && (
-                                                <>
-                                                    {order.receiverName && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收件人:</span>
-                                                            <span className="manage-shipping-value">{order.receiverName}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.receiverPhone && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货手机:</span>
-                                                            <span className="manage-shipping-value">{order.receiverPhone}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippingAddress && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货地址:</span>
-                                                            <span className="manage-shipping-value">{order.shippingAddress}</span>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
-
-                                            {/* 物流信息 */}
-                                            {(order.trackingNumber || order.shippedAt || order.deliveredAt) && (
-                                                <>
-                                                    {order.trackingNumber && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">运单号:</span>
-                                                            <span className="manage-shipping-value">{order.trackingNumber}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippedAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">发货时间:</span>
-                                                            <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.deliveredAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货时间:</span>
-                                                            <span className="manage-shipping-value">{formatDate(order.deliveredAt)}</span>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            )}
-
-                                            {/* 如果没有任何信息，显示提示 */}
-                                            {!order.receiverName && !order.receiverPhone && !order.shippingAddress && 
-                                             !order.trackingNumber && !order.shippedAt && !order.deliveredAt && (
-                                                <div className="manage-shipping-item">
-                                                    <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
-                                                        暂无详细信息
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                {/* 分页 */}
-                {totalPages > 1 && (
-                    <div className="manage-pagination">
-                        <button
-                            className="manage-pagination-btn"
-                            disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(currentPage - 1)}
-                        >
-                            上一页
-                        </button>
-                        <span className="manage-pagination-info">
-                            第 {currentPage} 页，共 {totalPages} 页
-                        </span>
-                        <button
-                            className="manage-pagination-btn"
-                            disabled={currentPage === totalPages}
-                            onClick={() => setCurrentPage(currentPage + 1)}
-                        >
-                            下一页
-                        </button>
-                    </div>
-                )}
+                </div>
             </div>
 
             {/* 批量发货弹窗 */}

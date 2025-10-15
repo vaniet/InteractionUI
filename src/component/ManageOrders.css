@@ -39,13 +39,13 @@
 
 /* 管理订单页面样式 */
 .manage-orders-container {
-    max-width: 1200px;
-    margin: 40px auto 80px auto;
-    padding: 32px 16px;
-    width: 650px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 /* 状态筛选 */
@@ -83,7 +83,7 @@
 /* 订单网格 */
 .manage-orders-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     margin-bottom: 32px;
 }
@@ -129,6 +129,47 @@
     padding: 4px 12px;
     border-radius: 12px;
     background: rgba(0, 0, 0, 0.05);
+}
+
+/* 头部右侧发货按钮区域 */
+.manage-order-header-actions {
+    margin-left: 12px;
+}
+
+.manage-ship-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 16px;
+    background: #1890ff;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.manage-ship-btn:hover {
+    background: #40a9ff;
+    transform: translateY(-1px);
+}
+
+.manage-edit-address-btn {
+    padding: 6px 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    color: #666;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-left: 8px;
+}
+
+.manage-edit-address-btn:hover {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+    transform: translateY(-1px);
 }
 
 /* 批量操作 */
@@ -297,7 +338,7 @@
 /* 统一的信息显示区域 - 右侧显示 */
 .manage-shipping-info-right {
     padding: 16px;
-    min-width: 280px;
+    min-width: 240px;
     flex-shrink: 0;
     border-left: 3px solid #1890ff;
     background: rgba(24, 144, 255, 0.02);
@@ -338,6 +379,50 @@
     color: #333;
     flex: 1;
     word-break: break-all;
+}
+
+/* 单个订单操作按钮（管理端） */
+.manage-order-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.manage-action-btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    background: #f5f5f5;
+    color: #666;
+}
+
+.manage-action-btn:hover {
+    background: #e8e8e8;
+    transform: translateY(-1px);
+}
+
+.manage-action-btn.primary {
+    background: #1890ff;
+    color: #fff;
+}
+
+.manage-action-btn.primary:hover {
+    background: #40a9ff;
+}
+
+@media (max-width: 768px) {
+    .manage-order-actions {
+        flex-direction: column;
+    }
+
+    .manage-action-btn {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 

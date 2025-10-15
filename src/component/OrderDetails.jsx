@@ -35,6 +35,7 @@ const OrderDetails = () => {
     // 批量操作相关状态
     const [selectedOrders, setSelectedOrders] = useState(new Set());
     const [showShippingModal, setShowShippingModal] = useState(false);
+    const [singleShippingOrderId, setSingleShippingOrderId] = useState(null); // 为单个订单填写收货信息
     const [shippingForm, setShippingForm] = useState({
         receiverName: '',
         receiverPhone: '',
@@ -88,6 +89,13 @@ const OrderDetails = () => {
 
         const targetOrderIds = filteredOrders
             .filter(order => order.shippingStatus === targetStatus)
+            .filter(order => {
+                // 在待发货的批量设置收货信息场景，仅选择未填写收货信息的订单
+                if (targetStatus === 'pending') {
+                    return !shippingInfoStatus[order.id];
+                }
+                return true;
+            })
             .map(order => order.id);
         setSelectedOrders(new Set(targetOrderIds));
     };
@@ -97,11 +105,29 @@ const OrderDetails = () => {
     };
 
     const openShippingModal = () => {
+        setSingleShippingOrderId(null);
+        setShowShippingModal(true);
+    };
+
+    const openSingleShippingModal = (orderId) => {
+        setSingleShippingOrderId(orderId);
+        setShowShippingModal(true);
+    };
+
+    // 打开单个订单的地址编辑，预填当前信息
+    const openSingleAddressEdit = (order) => {
+        setSingleShippingOrderId(order.id);
+        setShippingForm({
+            receiverName: order.receiverName || '',
+            receiverPhone: order.receiverPhone || '',
+            shippingAddress: order.shippingAddress || ''
+        });
         setShowShippingModal(true);
     };
 
     const closeShippingModal = () => {
         setShowShippingModal(false);
+        setSingleShippingOrderId(null);
         setShippingForm({
             receiverName: '',
             receiverPhone: '',
@@ -116,17 +142,19 @@ const OrderDetails = () => {
         }));
     };
 
-    // 批量设置收货信息
+    // 设置收货信息（支持单个或批量）
     const batchSetShippingInfo = async () => {
-        if (selectedOrders.size === 0) {
+        const targetIds = singleShippingOrderId ? [singleShippingOrderId] : Array.from(selectedOrders);
+
+        if (targetIds.length === 0) {
             setMsgType('error');
             setMsg('请先选择要设置的订单');
             return;
         }
 
-        // 验证选中的订单都是待发货状态
-        const selectedOrderDetails = orders.filter(order => selectedOrders.has(order.id));
-        const nonPendingOrders = selectedOrderDetails.filter(order => order.shippingStatus !== 'pending');
+        // 验证目标订单都是待发货状态
+        const targetOrders = orders.filter(order => targetIds.includes(order.id));
+        const nonPendingOrders = targetOrders.filter(order => order.shippingStatus !== 'pending');
 
         if (nonPendingOrders.length > 0) {
             setMsgType('error');
@@ -149,7 +177,7 @@ const OrderDetails = () => {
                 return;
             }
 
-            const promises = Array.from(selectedOrders).map(async (orderId) => {
+            const promises = targetIds.map(async (orderId) => {
                 try {
                     const res = await fetch(`http://localhost:7001/purchase/shipping-info/${orderId}`, {
                         method: 'PUT',
@@ -187,12 +215,10 @@ const OrderDetails = () => {
 
                 // 更新收货信息状态
                 const updatedStatus = { ...shippingInfoStatus };
-                Array.from(selectedOrders).forEach(orderId => {
+                targetIds.forEach(orderId => {
                     updatedStatus[orderId] = true;
                 });
                 setShippingInfoStatus(updatedStatus);
-
-                // 不需要重新fetchOrders，直接更新状态即可
             } else {
                 setMsgType('error');
                 setMsg('设置收货信息失败');
@@ -202,6 +228,48 @@ const OrderDetails = () => {
             setMsg('网络错误，设置收货信息失败');
         } finally {
             setShippingLoading(false);
+        }
+    };
+
+    // 单个确认收货
+    const confirmDeliverySingle = async (orderId) => {
+        setDeliveryLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setMsgType('error');
+                setMsg('请先登录');
+                return;
+            }
+
+            const res = await fetch(`http://localhost:7001/purchase/confirm-delivery/${orderId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.status === 401) {
+                setMsgType('error');
+                setMsg('登录已过期，请重新登录');
+                return;
+            }
+
+            const data = await res.json();
+            if (data.code === 200) {
+                setMsgType('success');
+                setMsg('确认收货成功');
+                fetchOrders();
+            } else {
+                setMsgType('error');
+                setMsg(data.message || '确认收货失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('网络错误，确认收货失败');
+        } finally {
+            setDeliveryLoading(false);
         }
     };
 
@@ -545,7 +613,7 @@ const OrderDetails = () => {
                                     onClick={selectAllOrders}
                                     disabled={selectedOrders.size === filteredOrders.length}
                                 >
-                                    全选
+                                    全选未发货订单
                                 </button>
                                 <button
                                     className="batch-btn clear-btn"
@@ -644,6 +712,24 @@ const OrderDetails = () => {
                                                     )}
                                                 </div>
                                             </div>
+                                        </div>
+                                        {/* 单个订单操作按钮 */}
+                                        <div className="order-actions" onClick={(e) => e.stopPropagation()}>
+                                            {order.shippingStatus === 'pending' && !shippingInfoStatus[order.id] && (
+                                                <button className="order-action-btn" onClick={() => openSingleShippingModal(order.id)}>填写收货信息</button>
+                                            )}
+                                            {order.shippingStatus === 'pending' && shippingInfoStatus[order.id] && (
+                                                <button className="order-action-btn" onClick={() => openSingleAddressEdit(order)}>修改收货信息</button>
+                                            )}
+                                            {order.shippingStatus === 'shipped' && (
+                                                <button
+                                                    className="order-action-btn primary"
+                                                    disabled={deliveryLoading}
+                                                    onClick={() => showConfirm(() => confirmDeliverySingle(order.id), '确认已收到该订单商品吗？')}
+                                                >
+                                                    {deliveryLoading ? '确认中...' : '确认收货'}
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -790,11 +876,11 @@ const OrderDetails = () => {
                 </div>
             )}
 
-            {/* 批量设置收货信息弹窗 */}
+            {/* 批量/单个 设置收货信息弹窗 */}
             {showShippingModal && (
                 <div className="shipping-modal-overlay" onClick={closeShippingModal}>
                     <div className="shipping-modal" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="shipping-modal-title">批量设置收货信息</h3>
+                        <h3 className="shipping-modal-title">{singleShippingOrderId ? '填写收货信息' : '批量设置收货信息'}</h3>
                         <div className="shipping-form-group">
                             <label htmlFor="receiverName">收货人:</label>
                             <input
@@ -826,7 +912,7 @@ const OrderDetails = () => {
                         </div>
                         <div className="shipping-modal-actions">
                             <button className="shipping-modal-btn shipping-modal-yes" onClick={batchSetShippingInfo} disabled={shippingLoading}>
-                                {shippingLoading ? '设置中...' : '设置'}
+                                {shippingLoading ? '设置中...' : (singleShippingOrderId ? '保存' : '设置')}
                             </button>
                             <button className="shipping-modal-btn shipping-modal-no" onClick={closeShippingModal} disabled={shippingLoading}>
                                 取消
