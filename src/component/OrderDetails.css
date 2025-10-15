@@ -744,6 +744,58 @@
     padding-top: 8px;
 }
 
+<<<<<<< HEAD
+/* 单个订单操作按钮（用户订单页） */
+.order-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.order-action-btn {
+    padding: 8px 14px;
+    border: 2px solid #e8e8e8;
+    border-radius: 20px;
+    background: white;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.order-action-btn:hover {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+    transform: translateY(-1px);
+}
+
+.order-action-btn.primary {
+    background: var(--primary-pink);
+    border-color: var(--primary-pink);
+    color: #fff;
+}
+
+.order-action-btn.primary:hover {
+    background: #ff6b9d;
+    border-color: #ff6b9d;
+}
+
+@media (max-width: 768px) {
+    .order-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .order-action-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+=======
+>>>>>>> a94d1738da790bc48a8d4842bf995b3144d39a10
 /* 收货信息弹窗样式 */
 .shipping-modal-overlay {
     position: fixed;
