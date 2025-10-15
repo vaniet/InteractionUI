@@ -1,0 +1,279 @@
+.blind-box-showcase-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.blind-box-showcase-title {
+    color: #692748;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blind-box-showcase-subtitle {
+    color: #666;
+    font-size: 16px;
+    margin-bottom: 24px;
+}
+
+.blind-box-showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.blind-box-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(105, 39, 72, 0.1);
+    height: 360px;
+    display: flex;
+    flex-direction: column;
+}
+
+.blind-box-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(105, 39, 72, 0.2);
+    border-color: rgba(105, 39, 72, 0.3);
+}
+
+.blind-box-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.blind-box-series-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.blind-box-series-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.blind-box-series-text {
+    flex: 1;
+}
+
+.blind-box-series-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.blind-box-style-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #692748;
+    text-shadow: 0 1px 2px rgba(105, 39, 72, 0.1);
+}
+
+.blind-box-purchase-time {
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+}
+
+.blind-box-cover-container {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: #f8f9fa;
+    aspect-ratio: 1;
+    border: 2px solid rgba(105, 39, 72, 0.1);
+    flex-shrink: 0;
+}
+
+.blind-box-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.blind-box-card:hover .blind-box-cover {
+    transform: scale(1.05);
+}
+
+.blind-box-cover-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    font-size: 14px;
+    background: #f8f9fa;
+}
+
+.blind-box-description {
+    font-size: 16px;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    min-height: 60px;
+    padding: 0 8px;
+}
+
+.blind-box-hidden-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.blind-box-showcase-loading {
+    text-align: center;
+    padding: 80px 20px;
+    color: #666;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.blind-box-showcase-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e8e8e8;
+    border-top: 4px solid #692748;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+.blind-box-showcase-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #ff4d4f;
+    font-size: 18px;
+    background: #fff2f0;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.blind-box-showcase-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: #999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.blind-box-showcase-empty-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+}
+
+.blind-box-showcase-empty-title {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: #666;
+}
+
+.blind-box-showcase-empty-subtitle {
+    font-size: 16px;
+    color: #ccc;
+}
+
+.blind-box-showcase-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    margin-top: 32px;
+}
+
+.blind-box-stat-item {
+    text-align: center;
+}
+
+.blind-box-stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #692748;
+    margin-bottom: 8px;
+}
+
+.blind-box-stat-label {
+    font-size: 16px;
+    color: #666;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .blind-box-showcase-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .blind-box-showcase-title {
+        font-size: 28px;
+    }
+
+    .blind-box-showcase-stats {
+        gap: 24px;
+        padding: 24px;
+    }
+
+    .blind-box-stat-number {
+        font-size: 28px;
+    }
+
+    .blind-box-card {
+        padding: 16px;
+        height: 400px;
+    }
+
+    .blind-box-series-cover {
+        width: 36px;
+        height: 36px;
+    }
+
+    .blind-box-series-name {
+        font-size: 13px;
+    }
+
+    .blind-box-style-name {
+        font-size: 15px;
+    }
+}
