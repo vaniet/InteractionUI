@@ -183,12 +183,25 @@ const ManageOrders = () => {
         setSelectedOrders(newSelected);
     };
 
-    // 全选/取消全选
+    // 计算待发货且已填写收货信息的可选订单ID
+    const getEligiblePendingIds = () => {
+        return orders
+            .filter(order => order.shippingStatus === 'pending' && shippingInfoStatus[order.id])
+            .map(order => order.id);
+    };
+
+    // 全选/取消全选（仅选择待发货且已填写信息的订单）
     const toggleSelectAll = () => {
-        if (selectedOrders.size === orders.length) {
-            setSelectedOrders(new Set());
+        const eligibleIds = getEligiblePendingIds();
+        const allSelected = eligibleIds.length > 0 && eligibleIds.every(id => selectedOrders.has(id));
+        if (allSelected) {
+            const next = new Set(selectedOrders);
+            eligibleIds.forEach(id => next.delete(id));
+            setSelectedOrders(next);
         } else {
-            setSelectedOrders(new Set(orders.map(order => order.id)));
+            const next = new Set(selectedOrders);
+            eligibleIds.forEach(id => next.add(id));
+            setSelectedOrders(next);
         }
     };
 
@@ -253,7 +266,7 @@ const ManageOrders = () => {
         setShippingInfoStatus(statusMap);
     };
 
-    // 批量发货
+    // 批量发货（仅对已填写收货信息的订单发货，跳过未填写）
     const batchShipping = async () => {
         if (selectedOrders.size === 0) {
             setMsgType('error');
@@ -270,26 +283,20 @@ const ManageOrders = () => {
                 return;
             }
 
-            // 检查所有选中订单的收货信息完整性
-            const checkPromises = Array.from(selectedOrders).map(async (orderId) => {
-                const isComplete = await checkShippingInfo(orderId);
-                return { orderId, isComplete };
-            });
+            // 仅发货已填写收货信息的订单，跳过未完成的
+            const selectedIds = Array.from(selectedOrders);
+            const eligibleToShip = selectedIds.filter((id) => shippingInfoStatus[id]);
+            const skippedIds = selectedIds.filter((id) => !shippingInfoStatus[id]);
 
-            const checkResults = await Promise.all(checkPromises);
-            const incompleteOrders = checkResults.filter(result => !result.isComplete);
-
-            // 如果有订单收货信息不完整，显示提示并阻止发货
-            if (incompleteOrders.length > 0) {
-                const incompleteOrderIds = incompleteOrders.map(result => result.orderId).join(', ');
+            if (eligibleToShip.length === 0) {
                 setMsgType('error');
-                setMsg(`以下订单收货信息不完整，无法发货：${incompleteOrderIds}`);
+                setMsg('当前选择中没有已填写收货信息的订单');
                 setShippingLoading(false);
                 return;
             }
 
             const requestBody = {
-                ids: Array.from(selectedOrders)
+                ids: eligibleToShip
             };
 
             // 只有当用户填写了运单号时才添加到请求体
@@ -321,6 +328,9 @@ const ManageOrders = () => {
             if (data.code === 200) {
                 const { success, failed, errors } = data.data;
                 let message = `批量发货完成：成功${success}个，失败${failed}个`;
+                if (skippedIds.length > 0) {
+                    message += `\n已跳过未填写收货信息的订单：${skippedIds.join(', ')}`;
+                }
 
                 if (failed > 0 && errors && errors.length > 0) {
                     message += `\n失败原因：${errors.join('; ')}`;
@@ -456,11 +466,14 @@ const ManageOrders = () => {
                                     <div className="manage-select-all">
                                         <input
                                             type="checkbox"
-                                            checked={selectedOrders.size === orders.length && orders.length > 0}
+                                            checked={(() => {
+                                                const eligible = getEligiblePendingIds();
+                                                return eligible.length > 0 && eligible.every(id => selectedOrders.has(id));
+                                            })()}
                                             onChange={toggleSelectAll}
                                             id="select-all"
                                         />
-                                        <label htmlFor="select-all">全选</label>
+                                        <label htmlFor="select-all">全选已填写信息的订单</label>
                                     </div>
                                     <span className="manage-selection-count">
                                         已选择 {selectedOrders.size} 个订单

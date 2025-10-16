@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 const PaymentConfirmModal = ({
     isVisible,
@@ -6,22 +7,35 @@ const PaymentConfirmModal = ({
     onConfirm,
     onCancel
 }) => {
+    useEffect(() => {
+        if (!isVisible) return;
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, [isVisible]);
+
     if (!isVisible) return null;
 
-    return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.6)',
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            zIndex: 2000
-        }}>
-            <div style={{
+    const overlay = (
+        <div
+            onClick={onCancel}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'rgba(0,0,0,0.6)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 9999,
+                inset: 0
+            }}
+        >
+            <div onClick={(e) => e.stopPropagation()} style={{
                 background: 'white',
                 borderRadius: '16px',
                 padding: '32px',
@@ -170,6 +184,8 @@ const PaymentConfirmModal = ({
             </div>
         </div>
     );
+
+    return ReactDOM.createPortal(overlay, document.body);
 };
 
 export default PaymentConfirmModal; 
